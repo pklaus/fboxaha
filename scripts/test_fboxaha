@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+
+from fboxaha import FritzAHA
+import argparse
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('host', help='Hostname of the Fritz!Box')
+parser.add_argument('--username', '-u', help='Username')
+parser.add_argument('--password', '-p', help='Password')
+
+try:
+    args = parser.parse_args()
+
+    fb = FritzAHA(args.host, args.username, args.password)
+
+    devices = fb.power_devices
+
+    for device in devices:
+        dev = device[0]
+        print("Consumption: ", fb.get_last_consumption(dev))
+
+    if len(devices) > 0:
+        while True:
+            print("Consumption: ", fb.get_last_consumption(devices[0][0]))
+except KeyboardInterrupt:
+    pass
+
