@@ -7,16 +7,17 @@ from pprint import pprint
 
 class FritzAHA(object):
 
-    GET_SESSION_ID_URL = "http://{host}/login_sid.lua"
+    GET_SESSION_ID_URL = "https://{host}/login_sid.lua"
     AHA_URL = "https://{host}/webservices/homeautoswitch.lua?ain={ain}&switchcmd={switchcmd}&sid={sid}"
-    BASE_URL = "http://{host}/{address}"
+    BASE_URL = "https://{host}/{address}"
 
-    def __init__(self, host, username, password):
+    def __init__(self, host, username, password, cert=None):
         self._sid = None
         self._cookies = None
         self.host = host
         self.username = username
         self.password = password
+        self.cert = cert
         self.get_session_id()
 
     @property
@@ -32,6 +33,10 @@ class FritzAHA(object):
     def get(self, *args, **kwargs):
         if self._sid and 'params' in kwargs:
             kwargs['params'].update({'sid': self._sid})
+        if self.cert:
+            kwargs['verify'] = self.cert
+        else:
+            kwargs['verify'] = False
         #if self._cookies:
         #    kwargs.update({'cookies': self._cookies})
         req = requests.get(*args, **kwargs)

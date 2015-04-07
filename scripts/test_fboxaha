@@ -7,11 +7,14 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('host', help='Hostname of the Fritz!Box')
 parser.add_argument('--username', '-u', help='Username')
 parser.add_argument('--password', '-p', help='Password')
+parser.add_argument('--cert', '-c', help='SSL Certificate '
+  'Fetch it with: '
+  'openssl s_client -showcerts -connect your_fbox_hostname:443 < /dev/null | openssl x509 > fbox-cert.pem')
 
 try:
     args = parser.parse_args()
 
-    fb = FritzAHA(args.host, args.username, args.password)
+    fb = FritzAHA(args.host, args.username, args.password, cert=args.cert)
 
     devices = fb.power_devices
 
