@@ -2,9 +2,13 @@
 
 from fboxaha import FritzAHA
 import argparse
+from datetime import datetime as dt
+import sys
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('host', help='Hostname of the Fritz!Box')
+parser.add_argument('--device', '-d', type=int, default=0, help='Device Number')
+parser.add_argument('--list', '-l', action='store_true', help='List available devices')
 parser.add_argument('--username', '-u', help='Username')
 parser.add_argument('--password', '-p', help='Password')
 parser.add_argument('--cert', '-c', help='SSL Certificate '
@@ -18,13 +22,19 @@ try:
 
     devices = fb.power_devices
 
-    for device in devices:
-        dev = device[0]
-        print("Consumption: ", fb.get_last_consumption(dev))
+    if args.list:
+        for i in range(len(devices)):
+            dev = devices[i]
+            print('{0} : Device "#{1}" (connected state: {2}, power state: {3})'.format(i, *dev))
+        sys.exit(0)
 
+    sep = ';'
     if len(devices) > 0:
         while True:
-            print("Consumption: ", fb.get_last_consumption(devices[0][0]))
+            line = ''
+            parts = [dt.now().strftime('%Y-%m-%dT%H:%M:%S')]
+            parts += ['{:.2f}'.format(fb.get_last_consumption(devices[args.device][0]))]
+            print(sep.join(parts))
 except KeyboardInterrupt:
     pass
 
