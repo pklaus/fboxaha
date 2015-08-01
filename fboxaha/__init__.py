@@ -4,6 +4,9 @@ import requests
 from xml.dom.minidom import parseString
 import hashlib
 from pprint import pprint
+import logging
+
+logger = logging.getLogger(__name__)
 
 class FritzAHA(object):
 
@@ -18,6 +21,9 @@ class FritzAHA(object):
         self.username = username
         self.password = password
         self.cert = cert
+        if not cert:
+            logger.warning("You are connecting to the device without checking the TLS certificate. That's not secure.")
+            requests.packages.urllib3.disable_warnings()
         self.get_session_id()
 
     @property
