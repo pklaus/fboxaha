@@ -7,7 +7,7 @@ import sys
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('host', help='Hostname of the Fritz!Box')
-parser.add_argument('--device', '-d', type=int, default=0, help='Device Number')
+parser.add_argument('--devices', '-d', type=int, nargs='*', default=[0], help='Device number (check available with --list)')
 parser.add_argument('--list', '-l', action='store_true', help='List available devices')
 parser.add_argument('--separator', '-s', default=' ', help='Output column separator')
 parser.add_argument('--username', '-u', help='Username')
@@ -21,20 +21,23 @@ try:
 
     fb = FritzAHA(args.host, args.username, args.password, cert=args.cert)
 
-    devices = fb.power_devices
+    all_devices = fb.power_devices
 
     if args.list:
-        for i in range(len(devices)):
-            dev = devices[i]
+        for i in range(len(all_devices)):
+            dev = all_devices[i]
             print('{0} : Device "#{1}" (connected state: {2}, power state: {3})'.format(i, *dev))
         sys.exit(0)
 
-    if len(devices) > 0:
-        while True:
-            line = ''
-            parts = [dt.now().strftime('%Y-%m-%dT%H:%M:%S')]
-            parts += ['{:.2f}'.format(fb.get_last_consumption(devices[args.device][0]))]
-            print(args.separator.join(parts))
+    for dev in args.devices:
+        assert dev < len(all_devices)
+
+    while True:
+        line = ''
+        parts = [dt.now().strftime('%Y-%m-%dT%H:%M:%S')]
+        for dev in args.devices:
+            parts.append('{:.2f}'.format(fb.get_last_consumption(all_devices[dev][0])))
+        print(args.separator.join(parts))
 except KeyboardInterrupt:
     pass
 
